@@ -1,13 +1,3 @@
-<?php
-// dashboard.php
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html");
-    exit();
-}
-?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,7 +20,7 @@ if (!isset($_SESSION['user_id'])) {
 
         h1 {
             font-size: 2.5rem;
-            color: #333;
+            color: whitesmoke;
             font-weight: bold;
         }
 
@@ -93,7 +83,7 @@ if (!isset($_SESSION['user_id'])) {
                         <a class="nav-link" href="#" onclick="showSection('view-transactions')">Transactions</a>
                     </li>
                     <li class="nav-item">
-                        <button class="btn btn-danger" onclick="logout(index.html)">Logout</button>
+                        <button class="btn btn-danger" onclick="logout('index.html')">Logout</button>
                     </li>
                 </ul>
             </div>
@@ -175,6 +165,9 @@ if (!isset($_SESSION['user_id'])) {
         <footer class="text-center">
             <p>MANAGE YOUR FINANCES SIMPLY AND WISELY!</p>
             <h4>"Whoever can be trusted with very little can also be trusted with much, and whoever is dishonest with very little will also be dishonest with much. So if you have not been trustworthy in handling worldly wealth, who will trust you with true riches?" <br>Luke 16:10-11</h4>
+            <!-- Reset Button (placed in the Dashboard section or anywhere appropriate) -->
+            <button id="reset-data" class="btn btn-danger mt-3" onclick="resetData()">Reset Everything</button>
+
         </footer>
     </div>
 
@@ -183,7 +176,7 @@ if (!isset($_SESSION['user_id'])) {
         <h1 class="text-center mb-4">Income</h1>
         <form id="income-form" action="add_transaction.php" method="POST" class="mt-4">
             <div class="form-group">
-                <label for="income-category">Times You Received Money</label>
+                <label for="income-category" class="text-white" >Times You Received Money</label>
                 <select class="form-select" id="income-category" required>
                     <option value="" disabled selected>Select Time</option>
                     <option value="Monthly">MONTHLY</option>
@@ -195,7 +188,7 @@ if (!isset($_SESSION['user_id'])) {
                 <input type="text" id="incomecat-specify" class="form-control mt-2" placeholder="Please specify" style="display:none;">
             </div>
             <div class="form-group">
-                <label for="income-from">Where You Get Money</label>
+                <label for="income-from" class="text-white" >Where You Get The Money</label>
                 <select class="form-select" id="income-from" onchange="showIncomeSpecifyField()" required>
                     <option value="" disabled selected>Source Of Money</option>
                     <option value="Parents">PARENTS</option>
@@ -206,7 +199,7 @@ if (!isset($_SESSION['user_id'])) {
                 <input type="text" id="income-specify" class="form-control mt-2" placeholder="Please specify" style="display:none;">
             </div>
             <div class="form-group">
-                <label for="income-amount">Your Total Money</label>
+                <label for="income-amount" class="text-white">Your Total Money</label>
                 <input type="number" class="form-control" id="income-amount" placeholder="Enter Total Amount" required>
             </div>
             <button type="submit" class="btn btn-primary mt-3">Add Income</button>
@@ -218,15 +211,15 @@ if (!isset($_SESSION['user_id'])) {
         <h1 class="text-center mb-4">Expenses</h1>
         <form id="expense-form" action="add_transaction.php" method="POST"class="mt-4">
             <div class="form-group">
-                <label for="expense-description">Description</label>
+                <label for="expense-description" class="text-white">Description</label>
                 <input type="text" class="form-control" id="expense-description" required>
             </div>
             <div class="form-group">
-                <label for="expense-amount">Amount</label>
+                <label for="expense-amount" class="text-white">Amount</label>
                 <input type="number" class="form-control" id="expense-amount" required>
             </div>
             <div class="form-group">
-                <label for="expense-category">Category</label>
+                <label for="expense-category" class="text-white">Category</label>
                 <select class="form-select" id="expense-category" onchange="showExpenseSpecifyField()" required>
                     <option value="" disabled selected>Select Category</option>
                     <option value="Food">Food</option>
@@ -235,15 +228,21 @@ if (!isset($_SESSION['user_id'])) {
                 </select>
                 <input type="text" id="expense-specify" class="form-control mt-2" placeholder="Please specify" style="display:none;">
             </div>
+            <div class="form-group">
+                <label for="budget-selection" class="text-white">Deduct From</label>
+                <select class="form-select" id="budget-selection" required>
+                    <option value="" disabled selected>Select Budget Allocation</option>
+                </select>
+            </div>
             <button type="submit" class="btn btn-primary mt-3">Add Expense</button>
         </form>      
     </div>
 
     <!-- Budget Section -->
     <div id="budget" class="container mt-5 section" style="display: none;">
-        <h1 class="text-center mb-4">Budget</h1>
+        <h1 class="text-center mb-4"class="text-white">Budget</h1>
         <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-4 text-warning">
                 <h3>Monthly Budget</h3>
                 <p>Allocated <input type="number" id="expense-percent" value="60" style="width: 50px;">% for 
                 <input type="text" id="expense-name" value="Expenses" style="width: 100px;"></p>
@@ -333,6 +332,7 @@ if (!isset($_SESSION['user_id'])) {
 
             if (incomeAmount > 0) {
                 totalIncome += incomeAmount;
+                localStorage.setItem('totalIncome', totalIncome);  // Save the updated total income
 
                 // Apply 60-20-10-10 Rule (based on current saved percentages)
                 const budgetAllocations = JSON.parse(localStorage.getItem('budgetAllocations')) || {
@@ -371,6 +371,8 @@ if (!isset($_SESSION['user_id'])) {
             const expenseAmount = parseFloat(document.getElementById('expense-amount').value);
             const description = document.getElementById('expense-description').value;
             let category = document.getElementById('expense-category').value;
+            const budgetDeductFrom = document.getElementById('budget-selection').value;  // Get the selected budget allocation
+
 
             if (category === 'Others') {
                 const specifyExpense = document.getElementById('expense-specify').value;
@@ -381,6 +383,53 @@ if (!isset($_SESSION['user_id'])) {
 
             if (expenseAmount > 0) {
                 totalExpenses += expenseAmount;
+                localStorage.setItem('totalExpenses', totalExpenses);  // Save the updated total expenses
+
+                // Deduct from the selected budget allocation
+                let budgetAllocations = JSON.parse(localStorage.getItem('budgetAllocations')) || {
+                expensePercent: 60,
+                emergencyPercent: 20,
+                investmentPercent: 10,
+                tithesPercent: 10
+            };
+
+            let totalIncome = parseFloat(localStorage.getItem('totalIncome')) || 0;
+
+            // original allocations
+        if (!localStorage.getItem('originalExpenses')) {
+            localStorage.setItem('originalExpenses', totalIncome * (budgetAllocations.expensePercent / 100));
+        }
+        if (!localStorage.getItem('originalEmergency')) {
+            localStorage.setItem('originalEmergency', totalIncome * (budgetAllocations.emergencyPercent / 100));
+        }
+        if (!localStorage.getItem('originalInvestment')) {
+            localStorage.setItem('originalInvestment', totalIncome * (budgetAllocations.investmentPercent / 100));
+        }
+        if (!localStorage.getItem('originalTithes')) {
+            localStorage.setItem('originalTithes', totalIncome * (budgetAllocations.tithesPercent / 100));
+        }
+
+
+
+            // Deduct the expense from the selected budget allocation
+        if (budgetDeductFrom === budgetAllocations.expenseName) {
+            let remainingExpenses = parseFloat(localStorage.getItem('remainingExpenses')) || (totalIncome * (budgetAllocations.expensePercent / 100));
+            remainingExpenses -= expenseAmount;
+            localStorage.setItem('remainingExpenses', remainingExpenses);  // Update remaining expenses in localStorage
+        } else if (budgetDeductFrom === budgetAllocations.emergencyName) {
+            let remainingEmergency = parseFloat(localStorage.getItem('remainingEmergency')) || (totalIncome * (budgetAllocations.emergencyPercent / 100));
+            remainingEmergency -= expenseAmount;
+            localStorage.setItem('remainingEmergency', remainingEmergency);  // Update remaining emergency in localStorage
+        } else if (budgetDeductFrom === budgetAllocations.investmentName) {
+            let remainingInvestment = parseFloat(localStorage.getItem('remainingInvestment')) || (totalIncome * (budgetAllocations.investmentPercent / 100));
+            remainingInvestment -= expenseAmount;
+            localStorage.setItem('remainingInvestment', remainingInvestment);  // Update remaining investment in localStorage
+        } else if (budgetDeductFrom === budgetAllocations.tithesName) {
+            let remainingTithes = parseFloat(localStorage.getItem('remainingTithes')) || (totalIncome * (budgetAllocations.tithesPercent / 100));
+            remainingTithes -= expenseAmount;
+            localStorage.setItem('remainingTithes', remainingTithes);  // Update remaining tithes in localStorage
+        }
+
 
                 // Add the expense transaction
                 addTransaction(description, expenseAmount, category, new Date().toLocaleDateString(), 'expense');
@@ -395,12 +444,39 @@ if (!isset($_SESSION['user_id'])) {
 
         // Function to update the dashboard
         function updateDashboard() {
-            const remainingBalance = totalIncome - totalExpenses;
+    const totalIncome = parseFloat(localStorage.getItem('totalIncome')) || 0;
+    const totalExpenses = parseFloat(localStorage.getItem('totalExpenses')) || 0;
 
-            document.getElementById('total-money').textContent = `₱${totalIncome.toFixed(2)}`;
-            document.getElementById('total-expenses').textContent = `₱${totalExpenses.toFixed(2)}`;
-            document.getElementById('remaining-balance').textContent = `₱${remainingBalance.toFixed(2)}`;
-        }
+    const remainingBalance = totalIncome - totalExpenses;
+
+    // Update income, expenses, and remaining balance on the dashboard
+    document.getElementById('total-money').textContent = `₱${totalIncome.toFixed(2)}`;
+    document.getElementById('total-expenses').textContent = `₱${totalExpenses.toFixed(2)}`;
+    document.getElementById('remaining-balance').textContent = `₱${remainingBalance.toFixed(2)}`;
+
+    // Load budget allocations and remaining amounts from localStorage
+    const budgetAllocations = JSON.parse(localStorage.getItem('budgetAllocations')) || {
+        expensePercent: 60,
+        emergencyPercent: 20,
+        investmentPercent: 10,
+        tithesPercent: 10
+    };
+    const originalExpenses = parseFloat(localStorage.getItem('originalExpenses')) || (totalIncome * (budgetAllocations.expensePercent / 100));
+    const originalEmergency = parseFloat(localStorage.getItem('originalEmergency')) || (totalIncome * (budgetAllocations.emergencyPercent / 100));
+    const originalInvestment = parseFloat(localStorage.getItem('originalInvestment')) || (totalIncome * (budgetAllocations.investmentPercent / 100));
+    const originalTithes = parseFloat(localStorage.getItem('originalTithes')) || (totalIncome * (budgetAllocations.tithesPercent / 100));
+
+    const remainingExpenses = parseFloat(localStorage.getItem('remainingExpenses')) || originalExpenses;
+    const remainingEmergency = parseFloat(localStorage.getItem('remainingEmergency')) || originalEmergency;
+    const remainingInvestment = parseFloat(localStorage.getItem('remainingInvestment')) || originalInvestment;
+    const remainingTithes = parseFloat(localStorage.getItem('remainingTithes')) || originalTithes;
+
+    // Display the remaining allocations along with the original allocation on the dashboard
+    document.getElementById('allocated-expenses').textContent = `₱${remainingExpenses.toFixed(2)} remaining FROM ₱${originalExpenses.toFixed(2)}`;
+    document.getElementById('allocated-emergency').textContent = `₱${remainingEmergency.toFixed(2)} remaining FROM ₱${originalEmergency.toFixed(2)}`;
+    document.getElementById('allocated-investment').textContent = `₱${remainingInvestment.toFixed(2)} remaining FROM ₱${originalInvestment.toFixed(2)}`;
+    document.getElementById('allocated-tithes').textContent = `₱${remainingTithes.toFixed(2)} remaining FROM ₱${originalTithes.toFixed(2)}`;
+}
 
         // Function to add transaction to the appropriate section
         function addTransaction(description, amount, category, date, type) {
@@ -429,6 +505,11 @@ if (!isset($_SESSION['user_id'])) {
             const incomeSource = document.getElementById('income-from').value;
             document.getElementById('income-specify').style.display = incomeSource === 'Others' ? 'block' : 'none';
         }
+        
+        document.getElementById('income-category').addEventListener('change', function() {
+        const incomecat = document.getElementById('income-category').value;
+        document.getElementById('incomecat-specify').style.display = incomecat === 'other' ? 'block' : 'none';
+});
 
         // Show specify field for Expenses "Others"
         function showExpenseSpecifyField() {
@@ -471,6 +552,7 @@ if (!isset($_SESSION['user_id'])) {
             document.getElementById('allocated-investment-header').textContent = `Allocated for ${investmentName} (${investmentPercent}%)`;
             document.getElementById('allocated-tithes-header').textContent = `Allocated for ${tithesName} (${tithesPercent}%)`;
 
+            updateDashboard();
             alert('Budget allocations saved!');
         }
 
@@ -492,10 +574,10 @@ if (!isset($_SESSION['user_id'])) {
                 document.getElementById('tithes-name').value = tithesName;
 
                 // Update the dashboard display (upper part and lower part)
-                document.getElementById('allocated-expenses-header').textContent = `Allocated for ${expenseName} (${expensePercent}%)`;
-                document.getElementById('allocated-emergency-header').textContent = `Emergency Fund (${emergencyPercent}%)`;
-                document.getElementById('allocated-investment-header').textContent = `Investment (${investmentPercent}%)`;
-                document.getElementById('allocated-tithes-header').textContent = `Tithes (${tithesPercent}%)`;
+                document.getElementById('allocated-expenses-header').textContent = `Allocation #1 ${expenseName} (${expensePercent}%)`;
+                document.getElementById('allocated-emergency-header').textContent = `Allocated #2 (${emergencyPercent}%)`;
+                document.getElementById('allocated-investment-header').textContent = `Allocated #3 (${investmentPercent}%)`;
+                document.getElementById('allocated-tithes-header').textContent = `Allocated #4 (${tithesPercent}%)`;
 
                 document.getElementById('allocated-expenses').textContent = `${expensePercent}% for ${expenseName}`;
                 document.getElementById('allocated-emergency').textContent = `${emergencyPercent}% for ${emergencyName}`;
@@ -504,26 +586,122 @@ if (!isset($_SESSION['user_id'])) {
             }
         });
 
+        // Function to reset all data in localStorage
+function resetData() {
+    // Confirm before resetting
+    const confirmation = confirm("Are you sure you want to reset all data? This action cannot be undone.");
+    
+    if (confirmation) {
+        // Clear all the relevant data from localStorage
+        localStorage.removeItem('totalIncome');
+        localStorage.removeItem('totalExpenses');
+        localStorage.removeItem('budgetAllocations');
+        localStorage.removeItem('remainingExpenses');
+        localStorage.removeItem('remainingEmergency');
+        localStorage.removeItem('remainingInvestment');
+        localStorage.removeItem('remainingTithes');
+        localStorage.removeItem('originalExpenses');
+        localStorage.removeItem('originalEmergency');
+        localStorage.removeItem('originalInvestment');
+        localStorage.removeItem('originalTithes');
+
+        // Optionally clear all of localStorage (this will clear EVERYTHING, including other data if stored)
+        // localStorage.clear();
+
+        // Reload or update the dashboard after resetting
+        updateDashboard();  // Reflect cleared data on the dashboard without reloading the page
+
+        // // Reload the page to reset the view or update the dashboard to reflect cleared data
+        // location.reload();  // This will reload the page for a fresh start
+        // // Alternatively, you can just call updateDashboard() if you want to stay on the same page
+        // // updateDashboard(); 
+    }
+}
+
+
+        // Function to dynamically populate budget options in the "Deduct From" dropdown
+    function populateBudgetSelection() {
+    const savedAllocations = JSON.parse(localStorage.getItem('budgetAllocations'));
+
+    if (savedAllocations) {
+        const budgetSelect = document.getElementById('budget-selection');
+
+        // Clear existing options except the first placeholder option
+        budgetSelect.innerHTML = '<option value="" disabled selected>Select Budget Allocation</option>';
+
+        // Add options dynamically based on the saved budget allocations
+        if (savedAllocations.expenseName) {
+            const option1 = document.createElement('option');
+            option1.value = savedAllocations.expenseName;
+            option1.textContent = savedAllocations.expenseName;
+            budgetSelect.appendChild(option1);
+        }
+
+        if (savedAllocations.emergencyName) {
+            const option2 = document.createElement('option');
+            option2.value = savedAllocations.emergencyName;
+            option2.textContent = savedAllocations.emergencyName;
+            budgetSelect.appendChild(option2);
+        }
+
+        if (savedAllocations.investmentName) {
+            const option3 = document.createElement('option');
+            option3.value = savedAllocations.investmentName;
+            option3.textContent = savedAllocations.investmentName;
+            budgetSelect.appendChild(option3);
+        }
+
+        if (savedAllocations.tithesName) {
+            const option4 = document.createElement('option');
+            option4.value = savedAllocations.tithesName;
+            option4.textContent = savedAllocations.tithesName;
+            budgetSelect.appendChild(option4);
+        }
+    }
+}
+
+// Call this function when the page loads or when the expenses section is shown
+window.addEventListener('load', populateBudgetSelection);
+
+
         // Function to show sections
         function showSection(sectionId) {
-            const sections = document.querySelectorAll('.section');
-            sections.forEach(section => section.style.display = 'none');
-            document.getElementById(sectionId).style.display = 'block';
-        }
+        const sections = document.querySelectorAll('.section');
+        sections.forEach(section => section.style.display = 'none');
+        document.getElementById(sectionId).style.display = 'block';
 
-        function logout() {
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'logout.php', true);
+        // Call populateBudgetSelection when the expenses section is shown
+        if (sectionId === 'expenses') {
+        populateBudgetSelection();
+    }
+}
+window.addEventListener('load', function() {
+    updateDashboard();  // Update the dashboard when the page loads
+});
+
+function logout() {
+    // Clear any session data or authentication tokens here
+    localStorage.clear();  // If you're using localStorage to store login data
+    sessionStorage.clear();  // If you're using sessionStorage
+    
+    // Redirect the user to the login page (you can change the URL as needed)
+    window.location.href = "index.html";  // Replace "login.html" with your actual login page URL
+}
+
+
+        // function logout() {
+        //     const xhr = new XMLHttpRequest();
+        //     xhr.open('POST', 'logout.php', true);
             
-            xhr.onload = function() {
-                if (this.status === 200) {
-                    alert(this.responseText); // Alert the response from the logout script
-                    window.location.href = 'index.html'; // Redirect to login page
-                }
-            };
+        //     xhr.onload = function() {
+        //         if (this.status === 200) {
+        //             alert(this.responseText); // Alert the response from the logout script
+        //             window.location.href = 'index.html'; // Redirect to login page
+        //         }
+        //     };
 
-            xhr.send(); // Send the request
-        }
+        //     xhr.send(); // Send the request
+        // }
 
     </script>
 </body>
