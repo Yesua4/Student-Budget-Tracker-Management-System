@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Budget Tracker Management System</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        /* General Styles */
+        .navbar {
+            background-color: #0B0C10;
+        }
+
+        .centered-buttons {
+            display: flex;
+            justify-content: center;
+        }
+
+        .navbar-brand, .nav-link {
+            color: #66FCF1 !important;
+            font-weight: bold;
+        }
+                /* Initial color and rotation for navbar-toggler icon */
+        .navbar-toggler-icon {
+            background-color: #66FCF1; /* Initial color */
+            transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition for color and rotation */
+        }
+
+        /* Style when the toggler is clicked (toggle the color and rotation) */
+        .navbar-toggler.clicked .navbar-toggler-icon {
+            background-color: #45A29E; /* Color after being clicked */
+            transform: rotate(180deg); /* Rotate the icon by 180 degrees */
+        }
+
+        /* Optional: Change background color of the navbar-toggler button */
+        .navbar-toggler {
+            background-color: transparent;  /* Ensure no default background */
+            border: none;  /* Optional: remove border */
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        h1,h2 {
+            font-size: 2.5rem;
+            color: white;
+            font-weight: bold;
+        }
+        .card {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .bg-income {
+            background-color: #0B0C10;
+        }
+
+        .bg-expense {
+            background-color: #0B0C10;
+        }
+
+        .bg-budget {
+            background-color: #0B0C10;
+        }
+
+
+        footer {
+            background-color: #0B0C10;
+            color: #faf8f8;
+            padding: 1rem 0;
+            position: relative;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Tabs and Hover Effects */
+        .tab-content {
+            margin-top: 20px;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: #0f1d31;
+            color: white !important;
+        }
+    </style>
+</head>
+<body style="background-color: #1F2833;">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#" onclick="showSection('home')">Student Budget Tracker</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" onclick="toggleToggler(this)">
+                <span class="navbar-toggler-icon"></span> <!-- Hamburger icon -->
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('home')">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('dashboard')">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('finance-section')">Manage Finances</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('view-transactions')">Transactions</a>
+                    </li>
+
+                
+                
+<!-- Profile Dropdown -->
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Profile
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown" style="width: 250px;">
+        <!-- Profile Information -->
+        <li class="dropdown-item text-center">
+            <img src="profile.jpg" alt="Profile" width="80" height="80" class="rounded-circle mb-2">
+            <p class="mb-1"><strong>Joshua M. Molid</strong></p> <!-- Replace with dynamic user's name -->
+            <p class="text-muted small mb-2">molid.joshua@dnsc.edu.ph</p> <!-- Optional email -->
+        </li>
+        <li><hr class="dropdown-divider"></li>
+
+        <li class="nav-item d-flex justify-content-center">
+            <button class="dropdown-item, btn btn-danger" onclick="logout('index.html')">LOGOUT</button>
+        </li>
+        <li class="nav-item d-flex justify-content-center mt-2">
+            <button id="reset-data" class="dropdown-item, btn btn-danger px-3" onclick="resetData()">RESET</button>
+        </li>
+    </ul>
+</li>
+</ul>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Section -->
+    <div id="home" class="section active container text-center mt-5">
+        <h1>Welcome to the Student Budget Tracker!</h1>
+        <h5 class="mt-4, text-white">Manage your finances simply and wisely. </h5>
+        <footer>
+            <p>"Whoever can be trusted with very little can also be trusted with much, and whoever is dishonest with very little will also be dishonest with much. So if you have not been trustworthy in handling worldly wealth, who will trust you with true riches?"
+            <br>Luke 16:10-11</p>
+        </footer>
+    </div>
+
+    <!-- Dashboard Section -->
+    <div id="dashboard" class="container mt-5 section">
+        <h1 class="text-center mb-4, text-white" >Dashboard</h1>
+        <br>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card bg-income text-white mb-3">
+                    <div class="card-header">Total Money/Income/Finances</div>
+                    <div class="card-body">
+                        <h5 id="total-money" class="card-text">₱0.00</h5>
+                        <p class="card-text">Your total money.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-expense text-white mb-3">
+                    <div class="card-header">Total Expenses</div>
+                    <div class="card-body">
+                        <h5 id="total-expenses" class="card-text">₱0.00</h5>
+                        <p class="card-text">Your total expenses.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-budget text-white mb-3">
+                    <div class="card-header">Remaining Balance</div>
+                    <div class="card-body">
+                        <h5 id="remaining-balance" class="card-text">₱0.00</h5>
+                        <p class="card-text">Your remaining balance.</p>
+                    </div>
+                </div>
+            </div>
+        </div><br>
+        <!-- Updated Dashboard Section for Allocations -->
+        <div class="container mt-5 section"></div>
+        <h1 class="text-center mb-4, text-white">Your Allocations</h1><br>
+        <div class="row mt-4">
+            <div class="col-md-3">
+                <div class="card mb-3" style="background-color: #66FCF1; color: #0B0C10;">
+                    <div class="card-header" id="allocated-expenses-header"></div>
+                    <div class="card-body">
+                        <h5 id="allocated-expenses" class="card-text">₱0.00</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card mb-3" style="background-color: #66FCF1; color: #0B0C10;">
+                    <div class="card-header" id="allocated-emergency-header"></div>
+                    <div class="card-body">
+                        <h5 id="allocated-emergency" class="card-text">₱0.00</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card mb-3" style="background-color: #66FCF1; color: #0B0C10;">
+                    <div class="card-header" id="allocated-investment-header"></div>
+                    <div class="card-body">
+                        <h5 id="allocated-investment" class="card-text">₱0.00</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card mb-3" style="background-color: #66FCF1; color: #0B0C10;">
+                    <div class="card-header" id="allocated-tithes-header"></div>
+                    <div class="card-body">
+                        <h5 id="allocated-tithes" class="card-text">₱0.00</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Combined Finance Section -->
+    <div id="finance-section" class="section container mt-5">
+        <h1 class="text-center">Manage Your Finances</h1>
+        <ul class="nav nav-tabs" id="finance-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="income-tab" data-bs-toggle="tab" href="#income">Income</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="expenses-tab" data-bs-toggle="tab" href="#expenses">Expenses</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="budget-tab" data-bs-toggle="tab" href="#budget">Allocations</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="income">
+                <div class="card" style="background-color: #0f1d31; color: white;">
+                <h2>Income</h2>
+                <!-- Income Form -->
+                <form id="income-form" action="add_transaction.php" method="POST" class="mt-4">
+                    <div class="form-group">
+                        <label for="income-category" class="text-white" >Times You Received Money</label>
+                        <select class="form-select" id="income-category" required>
+                            <option value="" disabled selected>Select Time</option>
+                            <option value="Monthly">MONTHLY</option>
+                            <option value="Weekly">WEEKLY</option>
+                            <option value="Daily">DAILY</option>
+                            <option value="today">ONLY TODAY</option>
+                            <option value="other">OTHERS</option>
+                        </select>
+                        <input type="text" id="incomecat-specify" class="form-control mt-2" placeholder="Please specify" style="display:none;">
+                    </div>
+                    <div class="form-group">
+                        <label for="income-from" class="text-white" >Where You Get The Money</label>
+                        <select class="form-select" id="income-from" onchange="showIncomeSpecifyField()" required>
+                            <option value="" disabled selected>Source Of Money</option>
+                            <option value="Parents">PARENTS</option>
+                            <option value="Scholarship">SCHOLARSHIP</option>
+                            <option value="Part-Time Jobs">PART-TIME JOBS</option>
+                            <option value="Others">OTHERS</option>
+                        </select>
+                        <input type="text" id="income-specify" class="form-control mt-2" placeholder="Please specify" style="display:none;">
+                    </div>
+                    <div class="form-group">
+                        <label for="income-amount" class="text-white">Your Total Money</label>
+                        <input type="number" class="form-control" id="income-amount" placeholder="Enter Total Amount" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Add Income</button>
+                </form>
+            </div></div>
+            <div class="tab-pane fade" id="expenses">
+                <div class="card" style="background-color: #0f1d31; color: white;">
+                <h2>Expenses</h2>
+                <!-- Expenses Form -->
+                 <form id="expense-form" action="add_transaction.php" method="POST"class="mt-4" >
+            <div class="form-group">
+                <label for="expense-description" class="text-white">Description</label>
+                <input type="text" class="form-control" id="expense-description" required>
+            </div>
+            <div class="form-group">
+                <label for="expense-amount" class="text-white">Amount</label>
+                <input type="number" class="form-control" id="expense-amount" required>
+            </div>
+            <div class="form-group">
+                <label for="expense-category" class="text-white">Category</label>
+                <select class="form-select" id="expense-category" onchange="showExpenseSpecifyField()" required>
+                    <option value="" disabled selected>Select Category</option>
+                    <option value="Food">Food</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Others">Others</option>
+                </select>
+                <input type="text" id="expense-specify" class="form-control mt-2" placeholder="Please specify" style="display:none;">
+            </div>
+            <div class="form-group">
+                <label for="budget-selection" class="text-white">Deduct From</label>
+                <select class="form-select" id="budget-selection" required>
+                    <option value="" disabled selected>Select Budget Allocation</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Add Expense</button>
+        </form>
+            </div>
+        </div>
+            <div class="tab-pane fade" id="budget"> 
+                <div class="card" style="background-color: #0f1d31; color: white;">
+                <h2>Allocations</h2>
+                <!-- Budget Form -->
+                <div class="row">
+                <div class="col-md-12 text-white">
+                    <p> </p>
+                    <p> </p>
+                    <p> </p>
+                    <p> </p>
+                    <p> </p>
+                    <p>Allocated <input type="number" id="expense-percent" value="0" style="width: 400px;">% for 
+                    <input type="text" id="expense-name" value="Allocation #1" style="width: 600px;"></p>
+                    <p>Allocated <input type="number" id="emergency-percent" value="0" style="width: 400px;">% for 
+                    <input type="text" id="emergency-name" value="Allocation #2" style="width: 600px;"></p>
+                    <p>Allocated <input type="number" id="investment-percent" value="0" style="width: 400px;">% for 
+                    <input type="text" id="investment-name" value="Allocation #3" style="width: 600px;"></p>
+                    <p>Allocated <input type="number" id="tithes-percent" value="0" style="width: 400px;">% for 
+                    <input type="text" id="tithes-name" value="Allocation #4" style="width: 600px;"></p>
+                    <button class="btn btn-primary mt-3" onclick="updateDashboardAllocations()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+    <!-- Transactions Section -->
+    <div id="view-transactions" class="section container mt-5">
+        <h1 class="text-center">Your Transactions</h1>
+        <!-- Transaction Table -->
+        <div class="card mt-4">
+            <div class="card-header">Income/Money/Allowance Transactions</div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody id="income-transaction-list">
+                      <!-- Income Transaction rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card mt-4">
+            <div class="card-header">Expense Transactions</div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody id="expense-transaction-list">
+                      <!-- Expense Transaction rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript -->
+    <script>
+                // JavaScript function to toggle the "clicked" class on the navbar-toggler button
+        function toggleToggler(button) {
+            button.classList.toggle('clicked'); // Toggle the "clicked" class to change color and rotate
+        }
+
+        // Placeholder for your showSection function
+        function showSection(section) {
+            console.log("Showing section:", section);
+        }
+
+
+        let totalIncome = 0;
+        let totalExpenses = 0;
+        
+        // Handle the income form submission
+        document.getElementById('income-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            const incomeAmount = parseFloat(document.getElementById('income-amount').value);
+            let incomeFrom = document.getElementById('income-from').value;
+            let incomeCat = document.getElementById('income-category').value;
+
+        if (incomeCat === "other") {
+           const specifycat = document.getElementById('incomecat-specify').value;
+         if (specifycat) {
+                    incomeCat = specifycat;
+        }
+    }
+
+            if (incomeFrom === 'Others') {
+                const specifyIncome = document.getElementById('income-specify').value;
+                if (specifyIncome) {
+                    incomeFrom = specifyIncome;
+                }
+            }
+
+            if (incomeAmount > 0) {
+                totalIncome += incomeAmount;
+                localStorage.setItem('totalIncome', totalIncome);  // Save the updated total income
+
+                // Apply 60-20-10-10 Rule (based on current saved percentages)
+                const budgetAllocations = JSON.parse(localStorage.getItem('budgetAllocations')) || {
+                    expensePercent: 60,
+                    emergencyPercent: 20,
+                    investmentPercent: 10,
+                    tithesPercent: 10
+                };
+
+                const expenses = totalIncome * (budgetAllocations.expensePercent / 100);
+                const emergency = totalIncome * (budgetAllocations.emergencyPercent / 100);
+                const investment = totalIncome * (budgetAllocations.investmentPercent / 100);
+                const tithes = totalIncome * (budgetAllocations.tithesPercent / 100);
+
+                // Update the dashboard with allocated amounts
+                document.getElementById('allocated-expenses').textContent = `₱${expenses.toFixed(2)}`;
+                document.getElementById('allocated-emergency').textContent = `₱${emergency.toFixed(2)}`;
+                document.getElementById('allocated-investment').textContent = `₱${investment.toFixed(2)}`;
+                document.getElementById('allocated-tithes').textContent = `₱${tithes.toFixed(2)}`;
+
+                // Add the income transaction to the income section
+                addTransaction(incomeFrom, incomeAmount, incomeCat, new Date().toLocaleDateString(), 'income');
+
+                // Update the dashboard
+                updateDashboard();
+            }
+
+            // Reset form after submission
+            this.reset();
+        });
+
+        // Function to handle adding expenses
+        document.getElementById('expense-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const expenseAmount = parseFloat(document.getElementById('expense-amount').value);
+            const description = document.getElementById('expense-description').value;
+            let category = document.getElementById('expense-category').value;
+            const budgetDeductFrom = document.getElementById('budget-selection').value;  // Get the selected budget allocation
+
+
+            if (category === 'Others') {
+                const specifyExpense = document.getElementById('expense-specify').value;
+                if (specifyExpense) {
+                    category = specifyExpense;
+                }
+            }
+
+            if (expenseAmount > 0) {
+                totalExpenses += expenseAmount;
+                localStorage.setItem('totalExpenses', totalExpenses);  // Save the updated total expenses
+
+                // Deduct from the selected budget allocation
+                let budgetAllocations = JSON.parse(localStorage.getItem('budgetAllocations')) || {
+                expensePercent: 60,
+                emergencyPercent: 20,
+                investmentPercent: 10,
+                tithesPercent: 10
+            };
+
+            let totalIncome = parseFloat(localStorage.getItem('totalIncome')) || 0;
+
+            // original allocations
+        if (!localStorage.getItem('originalExpenses')) {
+            localStorage.setItem('originalExpenses', totalIncome * (budgetAllocations.expensePercent / 100));
+        }
+        if (!localStorage.getItem('originalEmergency')) {
+            localStorage.setItem('originalEmergency', totalIncome * (budgetAllocations.emergencyPercent / 100));
+        }
+        if (!localStorage.getItem('originalInvestment')) {
+            localStorage.setItem('originalInvestment', totalIncome * (budgetAllocations.investmentPercent / 100));
+        }
+        if (!localStorage.getItem('originalTithes')) {
+            localStorage.setItem('originalTithes', totalIncome * (budgetAllocations.tithesPercent / 100));
+        }
+
+
+
+            // Deduct the expense from the selected budget allocation
+        if (budgetDeductFrom === budgetAllocations.expenseName) {
+            let remainingExpenses = parseFloat(localStorage.getItem('remainingExpenses')) || (totalIncome * (budgetAllocations.expensePercent / 100));
+            remainingExpenses -= expenseAmount;
+            localStorage.setItem('remainingExpenses', remainingExpenses);  // Update remaining expenses in localStorage
+        } else if (budgetDeductFrom === budgetAllocations.emergencyName) {
+            let remainingEmergency = parseFloat(localStorage.getItem('remainingEmergency')) || (totalIncome * (budgetAllocations.emergencyPercent / 100));
+            remainingEmergency -= expenseAmount;
+            localStorage.setItem('remainingEmergency', remainingEmergency);  // Update remaining emergency in localStorage
+        } else if (budgetDeductFrom === budgetAllocations.investmentName) {
+            let remainingInvestment = parseFloat(localStorage.getItem('remainingInvestment')) || (totalIncome * (budgetAllocations.investmentPercent / 100));
+            remainingInvestment -= expenseAmount;
+            localStorage.setItem('remainingInvestment', remainingInvestment);  // Update remaining investment in localStorage
+        } else if (budgetDeductFrom === budgetAllocations.tithesName) {
+            let remainingTithes = parseFloat(localStorage.getItem('remainingTithes')) || (totalIncome * (budgetAllocations.tithesPercent / 100));
+            remainingTithes -= expenseAmount;
+            localStorage.setItem('remainingTithes', remainingTithes);  // Update remaining tithes in localStorage
+        }
+
+
+                // Add the expense transaction
+                addTransaction(description, expenseAmount, category, new Date().toLocaleDateString(), 'expense');
+
+                // Update the dashboard
+                updateDashboard();
+            }
+
+            // Reset form after submission
+            this.reset();
+        });
+
+        // Function to update the dashboard
+        function updateDashboard() {
+    const totalIncome = parseFloat(localStorage.getItem('totalIncome')) || 0;
+    const totalExpenses = parseFloat(localStorage.getItem('totalExpenses')) || 0;
+
+    const remainingBalance = totalIncome - totalExpenses;
+
+    // Update income, expenses, and remaining balance on the dashboard
+    document.getElementById('total-money').textContent = `₱${totalIncome.toFixed(2)}`;
+    document.getElementById('total-expenses').textContent = `₱${totalExpenses.toFixed(2)}`;
+    document.getElementById('remaining-balance').textContent = `₱${remainingBalance.toFixed(2)}`;
+
+    // Load budget allocations and remaining amounts from localStorage
+    const budgetAllocations = JSON.parse(localStorage.getItem('budgetAllocations')) || {
+        expensePercent: 60,
+        emergencyPercent: 20,
+        investmentPercent: 10,
+        tithesPercent: 10
+    };
+    const originalExpenses = parseFloat(localStorage.getItem('originalExpenses')) || (totalIncome * (budgetAllocations.expensePercent / 100));
+    const originalEmergency = parseFloat(localStorage.getItem('originalEmergency')) || (totalIncome * (budgetAllocations.emergencyPercent / 100));
+    const originalInvestment = parseFloat(localStorage.getItem('originalInvestment')) || (totalIncome * (budgetAllocations.investmentPercent / 100));
+    const originalTithes = parseFloat(localStorage.getItem('originalTithes')) || (totalIncome * (budgetAllocations.tithesPercent / 100));
+
+    const remainingExpenses = parseFloat(localStorage.getItem('remainingExpenses')) || originalExpenses;
+    const remainingEmergency = parseFloat(localStorage.getItem('remainingEmergency')) || originalEmergency;
+    const remainingInvestment = parseFloat(localStorage.getItem('remainingInvestment')) || originalInvestment;
+    const remainingTithes = parseFloat(localStorage.getItem('remainingTithes')) || originalTithes;
+
+    // Display the remaining allocations along with the original allocation on the dashboard
+    document.getElementById('allocated-expenses').textContent = `₱${remainingExpenses.toFixed(2)} remaining FROM ₱${originalExpenses.toFixed(2)}`;
+    document.getElementById('allocated-emergency').textContent = `₱${remainingEmergency.toFixed(2)} remaining FROM ₱${originalEmergency.toFixed(2)}`;
+    document.getElementById('allocated-investment').textContent = `₱${remainingInvestment.toFixed(2)} remaining FROM ₱${originalInvestment.toFixed(2)}`;
+    document.getElementById('allocated-tithes').textContent = `₱${remainingTithes.toFixed(2)} remaining FROM ₱${originalTithes.toFixed(2)}`;
+}
+
+        // Function to add transaction to the appropriate section
+        function addTransaction(description, amount, category, date, type) {
+            const transaction = { description, amount, category, date };
+
+            let tableBody;
+            if (type === 'income') {
+                tableBody = document.getElementById('income-transaction-list');
+            } else if (type === 'expense') {
+                tableBody = document.getElementById('expense-transaction-list');
+            }
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${tableBody.children.length + 1}</td>
+                <td>${transaction.description}</td>
+                <td>₱${transaction.amount.toFixed(2)}</td>
+                <td>${transaction.category}</td>
+                <td>${transaction.date}</td>
+            `;
+            tableBody.appendChild(row);
+        }
+
+        // Show specify field for Income "Others"
+        function showIncomeSpecifyField() {
+            const incomeSource = document.getElementById('income-from').value;
+            document.getElementById('income-specify').style.display = incomeSource === 'Others' ? 'block' : 'none';
+        }
+        
+        document.getElementById('income-category').addEventListener('change', function() {
+        const incomecat = document.getElementById('income-category').value;
+        document.getElementById('incomecat-specify').style.display = incomecat === 'other' ? 'block' : 'none';
+});
+
+        // Show specify field for Expenses "Others"
+        function showExpenseSpecifyField() {
+            const expenseCategory = document.getElementById('expense-category').value;
+            document.getElementById('expense-specify').style.display = expenseCategory === 'Others' ? 'block' : 'none';
+        }
+
+        // Update dashboard with custom percentages and names and save to localStorage
+        function updateDashboardAllocations() {
+            const expensePercent = document.getElementById('expense-percent').value;
+            const expenseName = document.getElementById('expense-name').value;
+            const emergencyPercent = document.getElementById('emergency-percent').value;
+            const emergencyName = document.getElementById('emergency-name').value;
+            const investmentPercent = document.getElementById('investment-percent').value;
+            const investmentName = document.getElementById('investment-name').value;
+            const tithesPercent = document.getElementById('tithes-percent').value;
+            const tithesName = document.getElementById('tithes-name').value;
+
+            // Store updated budget allocations in localStorage
+            localStorage.setItem('budgetAllocations', JSON.stringify({
+                expensePercent,
+                expenseName,
+                emergencyPercent,
+                emergencyName,
+                investmentPercent,
+                investmentName,
+                tithesPercent,
+                tithesName
+            }));
+
+            // Apply the changes to the dashboard
+            document.getElementById('allocated-expenses').textContent = `${expensePercent}% for ${expenseName}`;
+            document.getElementById('allocated-emergency').textContent = `${emergencyPercent}% for ${emergencyName}`;
+            document.getElementById('allocated-investment').textContent = `${investmentPercent}% for ${investmentName}`;
+            document.getElementById('allocated-tithes').textContent = `${tithesPercent}% for ${tithesName}`;
+
+            // Reflect the changes dynamically on the dashboard lower part
+            document.getElementById('allocated-expenses-header').textContent = `Allocated for ${expenseName} (${expensePercent}%)`;
+            document.getElementById('allocated-emergency-header').textContent = `Allocated for ${emergencyName} (${emergencyPercent}%)`;
+            document.getElementById('allocated-investment-header').textContent = `Allocated for ${investmentName} (${investmentPercent}%)`;
+            document.getElementById('allocated-tithes-header').textContent = `Allocated for ${tithesName} (${tithesPercent}%)`;
+
+            // Update the dropdown for "Deduct From"
+            populateBudgetSelection();
+            updateDashboard();
+            alert('Budget allocations saved!');
+        }
+
+        // Load saved budget allocations from localStorage on page load
+        window.addEventListener('load', function() {
+            const savedAllocations = localStorage.getItem('budgetAllocations');
+            
+            if (savedAllocations) {
+                const { expensePercent, expenseName, emergencyPercent, emergencyName, investmentPercent, investmentName, tithesPercent, tithesName } = JSON.parse(savedAllocations);
+
+                // Update input fields
+                document.getElementById('expense-percent').value = expensePercent;
+                document.getElementById('expense-name').value = expenseName;
+                document.getElementById('emergency-percent').value = emergencyPercent;
+                document.getElementById('emergency-name').value = emergencyName;
+                document.getElementById('investment-percent').value = investmentPercent;
+                document.getElementById('investment-name').value = investmentName;
+                document.getElementById('tithes-percent').value = tithesPercent;
+                document.getElementById('tithes-name').value = tithesName;
+
+                // Update the dashboard display (upper part and lower part)
+                document.getElementById('allocated-expenses-header').textContent = `Allocation #1 ${expenseName} (${expensePercent}%)`;
+                document.getElementById('allocated-emergency-header').textContent = `Allocated #2 (${emergencyPercent}%)`;
+                document.getElementById('allocated-investment-header').textContent = `Allocated #3 (${investmentPercent}%)`;
+                document.getElementById('allocated-tithes-header').textContent = `Allocated #4 (${tithesPercent}%)`;
+
+                document.getElementById('allocated-expenses').textContent = `${expensePercent}% for ${expenseName}`;
+                document.getElementById('allocated-emergency').textContent = `${emergencyPercent}% for ${emergencyName}`;
+                document.getElementById('allocated-investment').textContent = `${investmentPercent}% for ${investmentName}`;
+                document.getElementById('allocated-tithes').textContent = `${tithesPercent}% for ${tithesName}`;
+            }
+        });
+
+        // Function to reset all data in localStorage
+function resetData() {
+    // Confirm before resetting
+    const confirmation = confirm("Are you sure you want to reset all data? This action cannot be undone.");
+    
+    if (confirmation) {
+        // Clear all the relevant data from localStorage
+        localStorage.removeItem('totalIncome');
+        localStorage.removeItem('totalExpenses');
+        localStorage.removeItem('budgetAllocations');
+        localStorage.removeItem('remainingExpenses');
+        localStorage.removeItem('remainingEmergency');
+        localStorage.removeItem('remainingInvestment');
+        localStorage.removeItem('remainingTithes');
+        localStorage.removeItem('originalExpenses');
+        localStorage.removeItem('originalEmergency');
+        localStorage.removeItem('originalInvestment');
+        localStorage.removeItem('originalTithes');
+        localStorage.removeItem('income-transaction-list');
+        localStorage.removeItem('expense-transaction-list');
+
+        // Optionally clear all of localStorage (this will clear EVERYTHING, including other data if stored)
+        // localStorage.clear();
+
+        // Reload or update the dashboard after resetting
+        updateDashboard();  // Reflect cleared data on the dashboard without reloading the page
+
+        // // Reload the page to reset the view or update the dashboard to reflect cleared data
+        // location.reload();  // This will reload the page for a fresh start
+        // // Alternatively, you can just call updateDashboard() if you want to stay on the same page
+        // // updateDashboard(); 
+    }
+}
+
+
+        // Function to dynamically populate budget options in the "Deduct From" dropdown
+    function populateBudgetSelection() {
+    const savedAllocations = JSON.parse(localStorage.getItem('budgetAllocations'));
+
+    if (savedAllocations) {
+        const budgetSelect = document.getElementById('budget-selection');
+
+        // Clear existing options except the first placeholder option
+        budgetSelect.innerHTML = '<option value="" disabled selected>Select Budget Allocation</option>';
+
+        // Add options dynamically based on the saved budget allocations
+        if (savedAllocations.expenseName) {
+            const option1 = document.createElement('option');
+            option1.value = savedAllocations.expenseName;
+            option1.textContent = savedAllocations.expenseName;
+            budgetSelect.appendChild(option1);
+        }
+
+        if (savedAllocations.emergencyName) {
+            const option2 = document.createElement('option');
+            option2.value = savedAllocations.emergencyName;
+            option2.textContent = savedAllocations.emergencyName;
+            budgetSelect.appendChild(option2);
+        }
+
+        if (savedAllocations.investmentName) {
+            const option3 = document.createElement('option');
+            option3.value = savedAllocations.investmentName;
+            option3.textContent = savedAllocations.investmentName;
+            budgetSelect.appendChild(option3);
+        }
+
+        if (savedAllocations.tithesName) {
+            const option4 = document.createElement('option');
+            option4.value = savedAllocations.tithesName;
+            option4.textContent = savedAllocations.tithesName;
+            budgetSelect.appendChild(option4);
+        }
+    }
+}
+
+// Call this function when the page loads or when the expenses section is shown
+window.addEventListener('load', populateBudgetSelection);
+
+
+        // Function to show sections
+        function showSection(sectionId) {
+        const sections = document.querySelectorAll('.section');
+        sections.forEach(section => section.style.display = 'none');
+        document.getElementById(sectionId).style.display = 'block';
+
+        // Call populateBudgetSelection when the expenses section is shown
+        if (sectionId === 'expenses') {
+        populateBudgetSelection();
+    }
+}
+window.addEventListener('load', function() {
+    updateDashboard();  // Update the dashboard when the page loads
+});
+
+function logout() {
+    const confirmation = confirm("Are you sure you want to LOGOUT? This action cannot be undone.");
+    // Clear any session data or authentication tokens here
+    localStorage.clear();  // If you're using localStorage to store login data
+    sessionStorage.clear();  // If you're using sessionStorage
+    
+    // Redirect the user to the login page (you can change the URL as needed)
+    window.location.href = "index.html";  // Replace "login.html" with your actual login page URL
+}
+
+
+        // function logout() {
+        //     const xhr = new XMLHttpRequest();
+        //     xhr.open('POST', 'logout.php', true);
+            
+        //     xhr.onload = function() {
+        //         if (this.status === 200) {
+        //             alert(this.responseText); // Alert the response from the logout script
+        //             window.location.href = 'index.html'; // Redirect to login page
+        //         }
+        //     };
+
+        //     xhr.send(); // Send the request
+        // }
+
+    </script>
+</body>
+</html>
